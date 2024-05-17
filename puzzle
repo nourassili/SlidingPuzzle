@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+import heapq
+import sys
+
+# Homework 2 - CSC242
+# Nour Assili - nassili@u.rochester.edu
+
+# Read the initial state 
+def read_initial_state():
+    size = int(input())  # first integer in input is size of the puzzle 3x3
+    initial_state = []   # initialize the initial state list
+    for _ in range(size):
+        row = list(map(int, input().split()))  # read each row
+        # split it into list of strings
+        initial_state.extend(row)  # append to the initial state list with the row values
+    return initial_state
+
+# Print the state of the puzzle board
+def print_state(state):
+    size = int(len(state) ** 0.5)  # Calculate the size of the puzzle board
+    # square root of len is number of cols or rows
+    for i in range(size): #join expects strings!
+        print(' '.join(map(str, state[i*size:(i+1)*size])))  # Print each row of the puzzle board
+
+# check if the state is a terminal state
+def is_terminal_state(state):
+    return sorted(state[:-1]) == state[:-1] and state[-1] == 0
+
+
+# Get possible moves for the blank tile
+def get_moves(state, size):
+    blank_index = state.index(0)
+    row, col = divmod(blank_index, size)
+    moves = []
+    if row > 0:
+        moves.append(('UP', blank_index - size))
+    if row < size - 1:
+        moves.append(('DOWN', blank_index + size))
+    if col > 0:
+        moves.append(('LEFT', blank_index - 1))
+    if col < size - 1:
+        moves.append(('RIGHT', blank_index + 1))
+    return moves
+
+# Perform the move -> return the new state
+def move(state, index):
+    new_state = state[:]
+    blank_index = new_state.index(0)
+    new_state[blank_index], new_state[index] = new_state[index], new_state[blank_index]
+    return new_state
+
+# Breadth First Search
+def bfs(initial_state, goal_state, size):
+    queue = [(initial_state, [])]
+    visited = set()
+    while queue:
+        state, path = queue.pop(0)
+        if state == goal_state:
+            return path
+        visited.add(tuple(state))
+        # explores the states of the puzzle level by level
+        # shorter paths explored before longer ones
+        for move_name, move_index in get_moves(state, size):
+            new_state = move(state, move_index)
+            if tuple(new_state) not in visited:
+                queue.append((new_state, path + [move_name]))
+
+# A* Search
+def astar(initial_state, goal_state, size):
+    heap = [(0, 0, initial_state, [])]  # (f(n), g(n), state, path)
+    visited = set()
+    while heap:
+        _, cost, state, path = heapq.heappop(heap)
+        if state == goal_state:
+            return path
+        visited.add(tuple(state))
+        for move_name, move_index in get_moves(state, size):
+            new_state = move(state, move_index)
+            if tuple(new_state) not in visited:
+                new_cost = cost + 1
+                # pass the goal_state directly to the manhattan_distance function
+                heapq.heappush(heap, (new_cost + manhattan_distance(new_state, goal_state), new_cost, new_state, path + [move_name]))
+
+# Calculate the Manhattan distance heuristic for A* search
+def manhattan_distance(state, goal):
+    distance = 0
+    for i in range(len(state)):
+        if state[i] != 0:
+            current_row, current_col = divmod(i, size)
+            goal_row, goal_col = divmod(goal.index(state[i]), size)
+            # divmod: calculate the Manhattan distance between two tiles 
+            # by comparing their row and column positions
+            distance += abs(current_row - goal_row) + abs(current_col - goal_col)
+    return distance
+
+# Main function
+if __name__ == "__main__":
+    initial_state = read_initial_state()  # Read the initial state of the puzzle board
+    print_state(initial_state)  # Print the initial state
+    if is_terminal_state(initial_state):  # Check if the initial state is a terminal state
+        print("Terminal State: Yes")
+    else:
+        print("Terminal State: No")
+    
+    if len(sys.argv) != 2 or sys.argv[1] not in ["--astar", "--bfs"]:
+        print("Usage: puzzle.py [--astar | --bfs]")
+        sys.exit(1)
+
+    algorithm = sys.argv[1]
+    size = int(len(initial_state) ** 0.5)
+    goal_state = list(range(1, size * size)) + [0]
+
+    if algorithm == "--astar":
+        solution = astar(initial_state, goal_state, size)
+    else:
+        solution = bfs(initial_state, goal_state, size)
+
+    for move_name in solution:
+        print(move_name)

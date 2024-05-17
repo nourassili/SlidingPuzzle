@@ -1,0 +1,58 @@
+
+Files: 
+puzzle.py: The main Python script containing the implementation of the sliding block puzzle solver using BFS and A* Search algorithms.
+test_in: A test file format containing the size of the puzzle board followed by the initial state of the board. Each row represents a line of the puzzle board, with numbers separated by spaces. The "0" represents the empty space or the blank tile. It is in this format:
+	3
+	1 2 5
+	3 4 8
+	6 7 0
+
+Logic: 
+
+
+Recommendation:
+
+	-> Use BFS for guaranteed optimality in finding the shortest solution.
+	-> Use A* Search for efficiency, especially with large puzzle sizes. But it depends on how good your heuristic function is!
+
+
+Usage:
+Ensure Python 3 is installed on your system.
+Place the test.txt (the initial state of the puzzle board) as input via standard input.
+
+./puzzle --astar < /Users/nour/Documents/2024/csc242/hw2/test_in.txt
+
+--astar: Use A* search algorithm.
+--bfs: Use Breadth First Search algorithm.
+
+Run the script using the commands and it should operate as follows:
+
+
+nour@dhcp-10-5-250-182 hw2 % ./puzzle --bfs < /Users/nour/Documents/2024/csc242/hw2/test_in.txt 
+1 2 5
+3 4 8
+6 7 0
+Terminal State: No
+LEFT
+UP
+LEFT
+DOWN
+RIGHT
+RIGHT
+UP
+LEFT
+LEFT
+UP
+RIGHT
+RIGHT
+DOWN
+LEFT
+UP
+LEFT
+DOWN
+DOWN
+RIGHT
+RIGHT
+
+
+
